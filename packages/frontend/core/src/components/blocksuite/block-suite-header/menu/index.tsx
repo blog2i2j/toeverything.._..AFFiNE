@@ -19,6 +19,8 @@ import { useExportPage } from '@affine/core/hooks/affine/use-export-page';
 import { useTrashModalHelper } from '@affine/core/hooks/affine/use-trash-modal-helper';
 import { useAsyncCallback } from '@affine/core/hooks/affine-async-hooks';
 import { mixpanel } from '@affine/core/mixpanel';
+import { WorkbenchService } from '@affine/core/modules/workbench';
+import { ViewService } from '@affine/core/modules/workbench/services/view';
 import { useDetailPageHeaderResponsive } from '@affine/core/pages/workspace/detail-page/use-header-responsive';
 import { WorkspaceFlavour } from '@affine/env/workspace';
 import { useI18n } from '@affine/i18n';
@@ -28,11 +30,13 @@ import {
   EditIcon,
   FavoritedIcon,
   FavoriteIcon,
+  FrameIcon,
   HistoryIcon,
   ImportIcon,
   InformationIcon,
   PageIcon,
   ShareIcon,
+  TocIcon,
 } from '@blocksuite/icons/rc';
 import type { Doc } from '@blocksuite/store';
 import {
@@ -78,6 +82,17 @@ export const PageHeaderMenuButton = ({
   const { duplicate } = useBlockSuiteMetaHelper(docCollection);
   const { importFile } = usePageHelper(docCollection);
   const { setTrashModal } = useTrashModalHelper(docCollection);
+
+  const workbench = useService(WorkbenchService).workbench;
+  const view = useService(ViewService).view;
+
+  const openSidePanel = useCallback(
+    (id: string) => () => {
+      workbench.openSidebar();
+      view.activeSidebarTab(id);
+    },
+    [workbench, view]
+  );
 
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const setOpenHistoryTipsModal = useSetAtom(openHistoryTipsModalAtom);
@@ -259,6 +274,33 @@ export const PageHeaderMenuButton = ({
           style={menuItemStyle}
         >
           {t['com.affine.page-properties.page-info.view']()}
+        </MenuItem>
+      )}
+      {currentMode === 'page' ? (
+        <MenuItem
+          preFix={
+            <MenuIcon>
+              <TocIcon />
+            </MenuIcon>
+          }
+          data-testid="editor-option-toc"
+          onSelect={openSidePanel('outline')}
+          style={menuItemStyle}
+        >
+          {t['com.affine.header.option.view-toc']()}
+        </MenuItem>
+      ) : (
+        <MenuItem
+          preFix={
+            <MenuIcon>
+              <FrameIcon />
+            </MenuIcon>
+          }
+          data-testid="editor-option-frame"
+          onSelect={openSidePanel('frame')}
+          style={menuItemStyle}
+        >
+          {t['com.affine.header.option.view-frame']()}
         </MenuItem>
       )}
       <MenuItem
