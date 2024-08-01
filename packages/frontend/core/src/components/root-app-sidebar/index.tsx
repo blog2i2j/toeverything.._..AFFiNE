@@ -84,10 +84,6 @@ export const RootAppSidebar = (): ReactElement => {
   const cmdkQuickSearchService = useService(CMDKQuickSearchService);
   const onOpenQuickSearchModal = useCallback(() => {
     cmdkQuickSearchService.toggle();
-    mixpanel.track('QuickSearchOpened', {
-      segment: 'navigation panel',
-      control: 'search button',
-    });
   }, [cmdkQuickSearchService]);
 
   const allPageActive = currentPath === '/all';
@@ -158,6 +154,7 @@ export const RootAppSidebar = (): ReactElement => {
           <QuickSearchInput
             className={quickSearch}
             data-testid="slider-bar-quick-search-button"
+            data-event-props="$.navigationPanel.generalFunction.quickSearch"
             onClick={onOpenQuickSearchModal}
           />
           <AddPageButton onClick={onClickNewPage} />
