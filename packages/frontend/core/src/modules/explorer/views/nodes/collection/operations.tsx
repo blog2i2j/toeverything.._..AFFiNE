@@ -7,7 +7,7 @@ import {
 } from '@affine/component';
 import { useAppSettingHelper } from '@affine/core/hooks/affine/use-app-setting-helper';
 import { useDeleteCollectionInfo } from '@affine/core/hooks/affine/use-delete-collection-info';
-import { mixpanel } from '@affine/core/mixpanel';
+import { track } from '@affine/core/mixpanel';
 import { CollectionService } from '@affine/core/modules/collection';
 import { CompatibleFavoriteItemsAdapter } from '@affine/core/modules/properties';
 import { WorkbenchService } from '@affine/core/modules/workbench';
@@ -57,15 +57,11 @@ export const useExplorerCollectionNodeOperations = (
   const createAndAddDocument = useCallback(() => {
     const newDoc = docsService.createDoc();
     collectionService.addPageToCollection(collectionId, newDoc.id);
-    mixpanel.track('DocCreated', {
-      page: 'sidebar',
-      module: 'collection',
-      control: 'add doc button',
+    track.$.navigationPanel.collections.createDoc({
+      control: 'button',
     });
-    mixpanel.track('AddDocToCollection', {
-      page: 'sidebar',
-      module: 'collection',
-      control: 'add doc button',
+    track.$.navigationPanel.collections.addDocToCollection({
+      control: 'button',
     });
     workbenchService.workbench.openDoc(newDoc.id);
     onOpenCollapsed();
@@ -79,13 +75,7 @@ export const useExplorerCollectionNodeOperations = (
 
   const handleToggleFavoriteCollection = useCallback(() => {
     compatibleFavoriteItemsAdapter.toggle(collectionId, 'collection');
-    mixpanel.track('ToggleFavorite', {
-      page: 'sidebar',
-      module: 'collection',
-      control: 'toggle favorite collection button',
-      type: 'collection',
-      id: collectionId,
-    });
+    track.$.navigationPanel.collections.toggleFavoriteCollection();
   }, [compatibleFavoriteItemsAdapter, collectionId]);
 
   const handleAddDocToCollection = useCallback(() => {
@@ -103,19 +93,15 @@ export const useExplorerCollectionNodeOperations = (
 
   const handleOpenInSplitView = useCallback(() => {
     workbenchService.workbench.openCollection(collectionId, { at: 'beside' });
-    mixpanel.track('OpenInSplitView', {
-      page: 'sidebar',
-      module: 'collection',
-      control: 'open in split view button',
+    track.$.navigationPanel.collections.openInSplitView({
+      control: 'button',
     });
   }, [collectionId, workbenchService.workbench]);
 
   const handleDeleteCollection = useCallback(() => {
     collectionService.deleteCollection(deleteInfo, collectionId);
-    mixpanel.track('CollectionDeleted', {
-      page: 'sidebar',
-      module: 'collection',
-      control: 'delete collection button',
+    track.$.navigationPanel.collections.deleteCollection({
+      control: 'button',
     });
   }, [collectionId, collectionService, deleteInfo]);
 

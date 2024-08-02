@@ -1,7 +1,7 @@
 import { Button, ErrorMessage, Skeleton } from '@affine/component';
 import { SettingRow } from '@affine/component/setting-components';
 import { openSettingModalAtom } from '@affine/core/atoms';
-import { mixpanel } from '@affine/core/mixpanel';
+import { track } from '@affine/core/mixpanel';
 import {
   ServerConfigService,
   SubscriptionService,
@@ -47,12 +47,7 @@ export const AIUsagePanel = () => {
       open: true,
       activeTab: 'billing',
     });
-    mixpanel.track('BillingViewed', {
-      segment: 'settings panel',
-      module: 'account usage list',
-      control: 'change plan button',
-      type: 'ai subscription',
-    });
+    track.$.settingsPanel.accountUsage.changePlan({ type: 'ai' });
   }, [setOpenSettingModal]);
 
   if (loading) {

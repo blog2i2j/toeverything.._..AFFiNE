@@ -17,17 +17,16 @@ function makeAutoTrackProxy(
       get(_target, prop) {
         if (
           typeof prop !== 'string' ||
-          prop === '$$typeof' /* webpack hot load reading this prop */
+          prop === '$$typeof' /* webpack hot-reload reads this prop */
         ) {
           return undefined;
         }
 
         if (levels[level] === 'control') {
-          return (arg: any) => {
-            mixpanel.track('custom_event', {
+          return (arg: string | Record<string, any>) => {
+            mixpanel.track(prop, {
               ...info,
-              control: prop,
-              arg,
+              ...(typeof arg === 'string' ? { arg } : arg),
             });
           };
         } else {
@@ -59,7 +58,12 @@ export const track = makeAutoTrackProxy() as CallableEventsChain;
  * @example
  *
  * ```html
- * <button data-event-chain='$.cmdk.settings.quicksearch.changeLanguage' data-event-arg='cn' />
+ * <button
+ *   data-event-chain='$.cmdk.settings.changeLanguage'
+ *   data-event-arg='cn'
+ *   <!-- or -->
+ *   data-event-args-foo='bar'
+ * />
  * ```
  */
 export function enableAutoTrack(root: HTMLElement) {
@@ -71,7 +75,16 @@ export function enableAutoTrack(root: HTMLElement) {
     const dataset = el.dataset;
 
     if (dataset['eventProps']) {
-      const arg = dataset['event-arg'];
+      const args: Record<string, any> = {};
+      if (dataset['event-arg'] !== 'undefined') {
+        args['arg'] = dataset['event-arg'];
+      } else {
+        for (const argName of Object.keys(dataset)) {
+          if (argName.startsWith('eventArgs')) {
+            args[argName.slice(8).toLowerCase()] = dataset[argName];
+          }
+        }
+      }
 
       const props = dataset['eventProps']
         .split('.')
@@ -86,7 +99,7 @@ export function enableAutoTrack(root: HTMLElement) {
         segment: props[1],
         module: props[2],
         control: props[3],
-        arg,
+        ...args,
       });
     }
   };

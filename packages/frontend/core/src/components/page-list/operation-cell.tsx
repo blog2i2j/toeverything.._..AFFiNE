@@ -10,7 +10,7 @@ import {
 import { useAppSettingHelper } from '@affine/core/hooks/affine/use-app-setting-helper';
 import { useBlockSuiteMetaHelper } from '@affine/core/hooks/affine/use-block-suite-meta-helper';
 import { useTrashModalHelper } from '@affine/core/hooks/affine/use-trash-modal-helper';
-import { mixpanel } from '@affine/core/mixpanel';
+import { track } from '@affine/core/mixpanel';
 import { FavoriteService } from '@affine/core/modules/favorite';
 import { CompatibleFavoriteItemsAdapter } from '@affine/core/modules/properties';
 import { WorkbenchService } from '@affine/core/modules/workbench';
@@ -110,13 +110,8 @@ export const PageOperationCell = ({
 
   const onDuplicate = useCallback(() => {
     duplicate(page.id, false);
-    mixpanel.track('DocCreated', {
-      segment: 'all doc',
-      module: 'doc item menu',
-      control: 'copy doc',
-      type: 'doc duplicate',
-      category: 'doc',
-      page: 'doc library',
+    track.allDocs.list.docMenu.createDoc({
+      control: 'duplicate',
     });
   }, [duplicate, page.id]);
 

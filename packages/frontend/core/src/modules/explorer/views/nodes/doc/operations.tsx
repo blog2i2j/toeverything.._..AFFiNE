@@ -7,7 +7,7 @@ import {
 } from '@affine/component';
 import { useAppSettingHelper } from '@affine/core/hooks/affine/use-app-setting-helper';
 import { useAsyncCallback } from '@affine/core/hooks/affine-async-hooks';
-import { mixpanel } from '@affine/core/mixpanel';
+import { track } from '@affine/core/mixpanel';
 import { CompatibleFavoriteItemsAdapter } from '@affine/core/modules/properties';
 import { WorkbenchService } from '@affine/core/modules/workbench';
 import { useI18n } from '@affine/i18n';
@@ -65,10 +65,8 @@ export const useExplorerDocNodeOperations = (
       },
       onConfirm() {
         docRecord.moveToTrash();
-        mixpanel.track('DocMovedTrash', {
-          page: 'sidebar',
-          module: 'doc',
-          control: 'move to trash button',
+        track.$.navigationPanel.docs.deleteDoc({
+          control: 'button',
         });
         toast(t['com.affine.toastMessage.movedTrash']());
       },
@@ -79,10 +77,8 @@ export const useExplorerDocNodeOperations = (
     workbenchService.workbench.openDoc(docId, {
       at: 'beside',
     });
-    mixpanel.track('OpenInSplitView', {
-      page: 'sidebar',
-      module: 'doc',
-      control: 'open in split view button',
+    track.$.navigationPanel.docs.openInSplitView({
+      control: 'button',
     });
   }, [docId, workbenchService]);
 
@@ -90,29 +86,15 @@ export const useExplorerDocNodeOperations = (
     const newDoc = docsService.createDoc();
     // TODO: handle timeout & error
     await docsService.addLinkedDoc(docId, newDoc.id);
-    mixpanel.track('DocCreated', {
-      page: 'sidebar',
-      module: 'doc',
-      control: 'add linked doc button',
-    });
-    mixpanel.track('LinkedDocCreated', {
-      page: 'sidebar',
-      module: 'doc',
-      control: 'add linked doc button',
-    });
+    track.$.navigationPanel.docs.createDoc({ control: 'linkDoc' });
+    track.$.navigationPanel.docs.linkDoc({ control: 'createDoc' });
     workbenchService.workbench.openDoc(newDoc.id);
     options.openNodeCollapsed();
   }, [docId, options, docsService, workbenchService.workbench]);
 
   const handleToggleFavoriteDoc = useCallback(() => {
     compatibleFavoriteItemsAdapter.toggle(docId, 'doc');
-    mixpanel.track('ToggleFavorite', {
-      page: 'sidebar',
-      module: 'doc',
-      control: 'toggle favorite button',
-      type: 'doc',
-      id: docId,
-    });
+    track.$.navigationPanel.docs.toggleFavoriteDoc();
   }, [docId, compatibleFavoriteItemsAdapter]);
 
   return useMemo(

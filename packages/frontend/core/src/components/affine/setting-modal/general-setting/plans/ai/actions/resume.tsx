@@ -5,8 +5,7 @@ import {
   useConfirmModal,
 } from '@affine/component';
 import { useAsyncCallback } from '@affine/core/hooks/affine-async-hooks';
-import { mixpanel } from '@affine/core/mixpanel';
-import type { MixpanelEvents } from '@affine/core/mixpanel/events';
+import { track } from '@affine/core/mixpanel';
 import { SubscriptionService } from '@affine/core/modules/cloud';
 import { SubscriptionPlan } from '@affine/graphql';
 import { useI18n } from '@affine/i18n';
@@ -16,11 +15,7 @@ import { cssVar } from '@toeverything/theme';
 import { nanoid } from 'nanoid';
 import { useState } from 'react';
 
-export interface AIResumeProps extends ButtonProps {
-  module: MixpanelEvents['PlanChangeStarted']['module'];
-}
-
-export const AIResume = ({ module, ...btnProps }: AIResumeProps) => {
+export const AIResume = (btnProps: ButtonProps) => {
   const t = useI18n();
   const [idempotencyKey, setIdempotencyKey] = useState(nanoid());
   const subscription = useService(SubscriptionService).subscription;
@@ -32,11 +27,8 @@ export const AIResume = ({ module, ...btnProps }: AIResumeProps) => {
   const resume = useAsyncCallback(async () => {
     const aiSubscription = subscription.ai$.value;
     if (aiSubscription) {
-      mixpanel.track('PlanChangeStarted', {
-        module,
-        segment: 'settings panel',
-        control: 'paying',
-        type: aiSubscription.plan,
+      track.$.settingsPanel.plans.startResuming({
+        type: SubscriptionPlan.AI,
         category: aiSubscription.recurring,
       });
     }
@@ -59,10 +51,9 @@ export const AIResume = ({ module, ...btnProps }: AIResumeProps) => {
           SubscriptionPlan.AI
         );
         if (aiSubscription) {
-          mixpanel.track('PlanChangeSucceeded', {
-            category: aiSubscription.recurring,
-            control: 'paying',
+          track.$.settingsPanel.plans.resumeSubscription({
             type: aiSubscription.plan,
+            category: aiSubscription.recurring,
           });
         }
         notify({
@@ -76,7 +67,7 @@ export const AIResume = ({ module, ...btnProps }: AIResumeProps) => {
         setIdempotencyKey(nanoid());
       },
     });
-  }, [subscription, openConfirmModal, t, module, idempotencyKey]);
+  }, [subscription, openConfirmModal, t, idempotencyKey]);
 
   return (
     <Button loading={isMutating} onClick={resume} type="primary" {...btnProps}>

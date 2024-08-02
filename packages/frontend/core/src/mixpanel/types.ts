@@ -6,7 +6,7 @@ export type CallableEventsChain = {
       [Module in keyof Events[Page][Segment]]: {
         // @ts-expect-error ignore `symbol | number` as key
         [Control in Events[Page][Segment][Module][number]]: (
-          arg?: string
+          arg?: string | Record<string, string | number | boolean | undefined>
         ) => void;
       };
     };
