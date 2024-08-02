@@ -962,13 +962,6 @@ export const reloadView = async () => {
   }
 };
 
-export const reloadView = async () => {
-  const id = WebContentViewsManager.instance.activeWorkbenchId;
-  if (id) {
-    await WebContentViewsManager.instance.loadTab(id);
-  }
-};
-
 export const onTabAction = (fn: (event: TabAction) => void) => {
   const { unsubscribe } =
     WebContentViewsManager.instance.tabAction$.subscribe(fn);
